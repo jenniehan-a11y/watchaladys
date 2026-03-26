@@ -33,41 +33,20 @@ interface KakaoPlace {
   place_url: string;
 }
 
-// Search Naver for place image by name + neighborhood
-async function fetchNaverImage(name: string, neighborhood: string): Promise<string> {
+// Fetch image using Kakao Image Search API
+async function fetchImage(name: string, neighborhood: string): Promise<string> {
   try {
-    // Use Naver place search via the summary endpoint
-    // We need a place ID first - try searching by name
-    const searchQuery = encodeURIComponent(`${name} ${neighborhood}`);
-    const searchRes = await fetch(
-      `https://map.naver.com/p/api/search/allSearch?query=${searchQuery}&type=place&searchCoord=126.978;37.566&boundary=`,
+    const query = encodeURIComponent(`${name} ${neighborhood}`);
+    const res = await fetch(
+      `https://dapi.kakao.com/v2/search/image?query=${query}&size=1`,
       {
         cache: "no-store",
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          Referer: "https://map.naver.com/p/",
-        },
+        headers: { Authorization: `KakaoAK ${KAKAO_API_KEY}` },
       }
     );
-    const searchData = await searchRes.json();
-    const placeId = searchData?.result?.place?.list?.[0]?.id;
-
-    if (!placeId) return "";
-
-    const placeRes = await fetch(
-      `https://map.naver.com/p/api/place/summary/${placeId}`,
-      {
-        cache: "no-store",
-        headers: {
-          "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-          Referer: "https://map.naver.com/p/",
-          Accept: "application/json",
-        },
-      }
-    );
-    const placeData = await placeRes.json();
-    const images = placeData?.data?.placeDetail?.images?.images || [];
-    return images[0]?.origin || "";
+    const data = await res.json();
+    const docs = data.documents || [];
+    return docs[0]?.image_url || docs[0]?.thumbnail_url || "";
   } catch {
     return "";
   }
@@ -121,8 +100,8 @@ export async function GET(req: NextRequest) {
           const catParts = p.category_name.split(" > ");
           const detailCat = catParts[catParts.length - 1] || cat;
 
-          // Try to get thumbnail from Naver
-          const imageUrl = await fetchNaverImage(p.place_name, dong);
+          // Get thumbnail from Kakao Image Search
+          const imageUrl = await fetchImage(p.place_name, dong);
 
           newOnes.push({
             name: p.place_name,
