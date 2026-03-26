@@ -39,12 +39,9 @@ export async function GET() {
   let failed = 0;
 
   for (const r of all) {
-    // Fix ALL images - replace with kakaocdn thumbnails
+    // Only keep kakaocdn images - replace everything else
     const isKakao = r.image_url && r.image_url.includes("kakaocdn.net");
-    const isNaver = r.image_url && r.image_url.includes("pstatic.net");
-
-    // Skip if already a working kakaocdn or naver image
-    if (isKakao || isNaver) continue;
+    if (isKakao) continue;
 
     const img = await findKakaoThumbnail([
       `${r.name} 음식`,
