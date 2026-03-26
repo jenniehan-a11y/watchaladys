@@ -24,7 +24,7 @@ const NEIGHBORHOODS = [
   "충장로",
 ];
 
-const CATEGORIES = ["술집", "맛집", "카페"];
+const CATEGORIES = ["술집", "맛집"];
 
 interface KakaoPlace {
   place_name: string;
