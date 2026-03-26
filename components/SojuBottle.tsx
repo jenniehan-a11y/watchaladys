@@ -1,49 +1,63 @@
 export default function SojuBottle() {
   return (
     <svg
-      viewBox="0 0 200 500"
+      viewBox="0 0 240 500"
       className="w-48 sm:w-56 md:w-64 cursor-pointer transition-transform hover:scale-105 active:scale-95"
       xmlns="http://www.w3.org/2000/svg"
     >
-      {/* Bottle cap */}
-      <rect x="80" y="0" width="40" height="20" rx="4" fill="#1A1A1A" />
-
-      {/* Bottle neck */}
-      <rect x="85" y="20" width="30" height="80" rx="6" fill="#D4B8E0" />
-
-      {/* Bottle neck taper */}
+      {/* Bottle - single smooth path, chubby whiskey shape */}
       <path
-        d="M85 100 Q85 130 60 150 L60 150 L140 150 Q115 130 115 100 Z"
+        d="
+          M104 8
+          Q104 2 110 2 L130 2 Q136 2 136 8
+          L136 20
+          Q136 24 133 24 L107 24 Q104 24 104 20
+          Z
+        "
+        fill="#1A1A1A"
+      />
+      <path
+        d="
+          M107 24
+          L107 80
+          Q107 100 100 115
+          Q80 145 52 170
+          Q38 185 38 210
+          L38 430
+          Q38 458 60 458
+          L180 458
+          Q202 458 202 430
+          L202 210
+          Q202 185 188 170
+          Q160 145 140 115
+          Q133 100 133 80
+          L133 24
+        "
         fill="#D4B8E0"
       />
 
-      {/* Bottle body */}
-      <rect x="60" y="150" width="80" height="300" rx="8" fill="#D4B8E0" />
-
-      {/* Bottle bottom */}
-      <rect x="60" y="440" width="80" height="10" rx="4" fill="#B89CC8" />
-
       {/* Label background */}
-      <rect x="65" y="200" width="70" height="180" rx="4" fill="#E8652E" />
+      <rect x="48" y="220" width="144" height="190" rx="6" fill="#E8652E" />
 
       {/* Polka dots on label */}
-      <circle cx="85" cy="225" r="10" fill="#6B7FD7" />
-      <circle cx="115" cy="250" r="8" fill="#6B7FD7" />
-      <circle cx="80" cy="280" r="12" fill="#6B7FD7" />
-      <circle cx="120" cy="310" r="9" fill="#6B7FD7" />
-      <circle cx="95" cy="345" r="11" fill="#6B7FD7" />
+      <circle cx="80" cy="250" r="14" fill="#6B7FD7" />
+      <circle cx="155" cy="270" r="11" fill="#6B7FD7" />
+      <circle cx="70" cy="310" r="16" fill="#6B7FD7" />
+      <circle cx="165" cy="340" r="12" fill="#6B7FD7" />
+      <circle cx="110" cy="375" r="14" fill="#6B7FD7" />
+      <circle cx="150" cy="390" r="9" fill="#6B7FD7" />
 
       {/* Label text */}
       <text
-        x="100"
-        y="270"
+        x="120"
+        y="310"
         textAnchor="middle"
         fill="#1A1A1A"
-        fontSize="9"
+        fontSize="13"
         fontWeight="bold"
         fontFamily="serif"
       >
-        watchaladys
+        {"women's place"}
       </text>
     </svg>
   );

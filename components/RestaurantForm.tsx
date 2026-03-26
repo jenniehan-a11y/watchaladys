@@ -22,11 +22,65 @@ export default function RestaurantForm({ initialData }: RestaurantFormProps) {
     naver_map_url: initialData?.naver_map_url ?? "",
     instagram_url: initialData?.instagram_url ?? "",
     memo: initialData?.memo ?? "",
+    image_url: initialData?.image_url ?? "",
   });
   const [saving, setSaving] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [fetching, setFetching] = useState(false);
+  const [showMap, setShowMap] = useState(false);
 
   const handleChange = (field: keyof RestaurantInsert, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Fetch place info by Naver Map link (naver.me or map.naver.com)
+  const handleNaverFetch = async (url: string) => {
+    setFetching(true);
+    try {
+      const res = await fetch("/api/naver-place", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error);
+
+      setForm((prev) => ({
+        ...prev,
+        name: data.name || prev.name,
+        region: data.region || prev.region,
+        neighborhood: data.neighborhood || prev.neighborhood,
+        category: data.category || prev.category,
+        naver_map_url: data.naver_map_url || url,
+        image_url: data.image_url || prev.image_url,
+      }));
+      setShowMap(false);
+      setSearchQuery("");
+    } catch {
+      setForm((prev) => ({ ...prev, naver_map_url: url }));
+    }
+    setFetching(false);
+  };
+
+  const handleSearchInput = (value: string) => {
+    setSearchQuery(value);
+  };
+
+  // Detect paste of Naver Map link
+  const handlePaste = (e: React.ClipboardEvent) => {
+    const pasted = e.clipboardData.getData("text");
+    if (pasted.includes("naver.me/") || pasted.includes("map.naver.com")) {
+      e.preventDefault();
+      setSearchQuery(pasted);
+      handleNaverFetch(pasted);
+    }
+  };
+
+  // Manual fetch button
+  const handleManualFetch = () => {
+    if (searchQuery.includes("naver.me/") || searchQuery.includes("map.naver.com")) {
+      handleNaverFetch(searchQuery);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -38,6 +92,7 @@ export default function RestaurantForm({ initialData }: RestaurantFormProps) {
       naver_map_url: form.naver_map_url || null,
       instagram_url: form.instagram_url || null,
       memo: form.memo || null,
+      image_url: form.image_url || null,
     };
 
     if (isEditing) {
@@ -54,6 +109,75 @@ export default function RestaurantForm({ initialData }: RestaurantFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
+      {/* Search section */}
+      {!isEditing && (
+        <div className="bg-[#2D5016] rounded-2xl p-4 space-y-3">
+          <label className="block text-sm font-semibold text-[#F5F0E8]">
+            맛집 검색
+          </label>
+
+          {/* Search input + Naver Map link input */}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => handleSearchInput(e.target.value)}
+              onPaste={handlePaste}
+              placeholder="네이버 지도 링크 붙여넣기"
+              className="flex-1 px-4 py-3 rounded-xl bg-[#F5F0E8] border-2 border-transparent text-[#3D1A1A] placeholder:text-[#3D1A1A]/40 focus:outline-none focus:border-[#6B7FD7] text-sm"
+            />
+            <button
+              type="button"
+              onClick={handleManualFetch}
+              disabled={fetching || !searchQuery}
+              className="px-4 py-3 rounded-xl bg-[#E8652E] text-[#F5F0E8] font-semibold text-sm hover:bg-[#D55A25] transition-colors disabled:opacity-50 whitespace-nowrap"
+            >
+              {fetching ? "..." : "가져오기"}
+            </button>
+          </div>
+          {!showMap && (
+            <button
+              type="button"
+              onClick={() => setShowMap(true)}
+              className="text-xs text-[#F5F0E8]/80 underline"
+            >
+              네이버 지도에서 직접 찾기
+            </button>
+          )}
+
+          {fetching && (
+            <p className="text-xs text-[#F5F0E8]/80">가게 정보 가져오는 중...</p>
+          )}
+
+          <p className="text-xs text-[#F5F0E8]/60">
+            네이버 지도 링크를 붙여넣으면 자동으로 정보를 가져와요
+          </p>
+
+          {/* Embedded Naver Map */}
+          {showMap && (
+            <div className="space-y-2">
+              <div className="rounded-xl overflow-hidden bg-white">
+                <iframe
+                  src={`https://map.naver.com/p/search/${encodeURIComponent(searchQuery || "맛집")}`}
+                  className="w-full h-96 border-0"
+                  allow="geolocation"
+                />
+              </div>
+              <p className="text-xs text-[#F5F0E8]/80">
+                위 지도에서 가게를 찾은 후 &quot;공유&quot; → 링크 복사 → 위 입력창에 붙여넣기
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowMap(false)}
+                className="text-xs text-[#F5F0E8]/60 underline"
+              >
+                지도 닫기
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       <div>
         <label className="block text-sm font-semibold text-[#3D1A1A] mb-1">가게명 *</label>
         <input type="text" required value={form.name} onChange={(e) => handleChange("name", e.target.value)} placeholder="가게 이름" className={inputClass} />
@@ -79,11 +203,11 @@ export default function RestaurantForm({ initialData }: RestaurantFormProps) {
         <div className="flex gap-2">
           <button type="button" onClick={() => handleChange("status", "want_to_go")}
             className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-colors ${form.status === "want_to_go" ? "bg-[#E8652E] text-[#F5F0E8]" : "bg-[#F5F0E8] text-[#3D1A1A] border-2 border-[#3D1A1A]/20"}`}>
-            가고싶다
+            want
           </button>
           <button type="button" onClick={() => handleChange("status", "visited")}
             className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-colors ${form.status === "visited" ? "bg-[#6B7FD7] text-[#F5F0E8]" : "bg-[#F5F0E8] text-[#3D1A1A] border-2 border-[#3D1A1A]/20"}`}>
-            다녀왔다
+            check
           </button>
         </div>
       </div>

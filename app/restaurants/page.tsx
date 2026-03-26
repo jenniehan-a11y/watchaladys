@@ -62,8 +62,8 @@ export default function RestaurantsPage() {
 
   return (
     <main className="min-h-dvh bg-[#F5F0E8] pb-24">
-      <header className="sticky top-0 z-10 bg-[#2D5016] px-4 py-4 space-y-3">
-        <h1 className="text-xl font-bold text-[#F5F0E8]">watchaladys</h1>
+      <header className="sticky top-0 z-10 bg-[#E5A830] px-4 py-4 space-y-3">
+        <Link href="/" className="text-xl font-bold text-[#1A1A1A]">women&apos;s place</Link>
         <StatusTabs activeTab={activeTab} onTabChange={setActiveTab} />
         <FilterBar
           regions={regions}
@@ -81,7 +81,7 @@ export default function RestaurantsPage() {
         />
       </header>
 
-      <section className="px-4 py-4 space-y-3">
+      <section className="px-16 py-8">
         {loading ? (
           <p className="text-center text-[#3D1A1A]/60 py-12">불러오는 중...</p>
         ) : filtered.length === 0 ? (
@@ -89,9 +89,11 @@ export default function RestaurantsPage() {
             아직 저장된 맛집이 없어요
           </p>
         ) : (
-          filtered.map((r) => (
-            <RestaurantCard key={r.id} restaurant={r} onDelete={handleDelete} />
-          ))
+          <div className="grid grid-cols-3 gap-8">
+            {filtered.map((r) => (
+              <RestaurantCard key={r.id} restaurant={r} onDelete={handleDelete} />
+            ))}
+          </div>
         )}
       </section>
 

@@ -8,6 +8,7 @@ export interface Restaurant {
   naver_map_url: string | null;
   instagram_url: string | null;
   memo: string | null;
+  image_url: string | null;
   created_at: string;
   updated_at: string;
 }

@@ -16,7 +16,7 @@ export default function StatusTabs({ activeTab, onTabChange }: StatusTabsProps) 
             : "bg-[#F5F0E8] text-[#3D1A1A] border border-[#3D1A1A]"
         }`}
       >
-        가고싶다
+        want
       </button>
       <button
         onClick={() => onTabChange("visited")}
@@ -26,7 +26,7 @@ export default function StatusTabs({ activeTab, onTabChange }: StatusTabsProps) 
             : "bg-[#F5F0E8] text-[#3D1A1A] border border-[#3D1A1A]"
         }`}
       >
-        다녀왔다
+        check
       </button>
     </div>
   );

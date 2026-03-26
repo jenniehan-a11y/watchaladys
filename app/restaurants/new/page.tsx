@@ -1,3 +1,5 @@
+"use client";
+
 import RestaurantForm from "@/components/RestaurantForm";
 import Link from "next/link";
 
