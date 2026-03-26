@@ -115,7 +115,7 @@ export default function RestaurantsPage() {
         />
       </header>
 
-      <section className="px-16 py-8">
+      <section className="px-4 md:px-16 py-6 md:py-8">
         {loading ? (
           <p className="text-center text-[#3D1A1A]/60 py-12">불러오는 중...</p>
         ) : filtered.length === 0 ? (
@@ -123,7 +123,7 @@ export default function RestaurantsPage() {
             아직 저장된 맛집이 없어요
           </p>
         ) : (
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
             {filtered.map((r) => (
               <RestaurantCard key={r.id} restaurant={r} allRestaurants={restaurants} onDelete={handleDelete} />
             ))}

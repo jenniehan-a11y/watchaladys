@@ -5,7 +5,8 @@ const KAKAO_API_KEY = process.env.KAKAO_REST_API_KEY || "";
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
 const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-async function findWorkingImage(queries: string[]): Promise<string> {
+// Use Kakao's own thumbnail URL (hosted on kakaocdn.net - never blocked)
+async function findKakaoThumbnail(queries: string[]): Promise<string> {
   for (const q of queries) {
     try {
       const res = await fetch(
@@ -17,15 +18,9 @@ async function findWorkingImage(queries: string[]): Promise<string> {
       );
       const data = await res.json();
       for (const doc of data.documents || []) {
-        const url = doc.image_url || "";
-        if (!url) continue;
-        // Verify image loads
-        try {
-          const check = await fetch(url, { method: "HEAD" });
-          if (check.ok) return url;
-        } catch {
-          continue;
-        }
+        // Use thumbnail_url (kakaocdn.net) instead of image_url (external)
+        const url = doc.thumbnail_url || "";
+        if (url && url.includes("kakaocdn.net")) return url;
       }
     } catch {
       continue;
@@ -44,25 +39,18 @@ export async function GET() {
   let failed = 0;
 
   for (const r of all) {
-    // Check if current image works
-    let needsFix = !r.image_url;
-    if (r.image_url) {
-      try {
-        const check = await fetch(r.image_url, { method: "HEAD" });
-        if (!check.ok) needsFix = true;
-      } catch {
-        needsFix = true;
-      }
-    }
+    // Fix ALL images - replace with kakaocdn thumbnails
+    const isKakao = r.image_url && r.image_url.includes("kakaocdn.net");
+    const isNaver = r.image_url && r.image_url.includes("pstatic.net");
 
-    if (!needsFix) continue;
+    // Skip if already a working kakaocdn or naver image
+    if (isKakao || isNaver) continue;
 
-    // Search with multiple queries for best result
-    const img = await findWorkingImage([
+    const img = await findKakaoThumbnail([
       `${r.name} 음식`,
       `${r.name} ${r.neighborhood}`,
       `${r.name} 맛집`,
-      `${r.neighborhood} ${r.category} 맛집 음식`,
+      `${r.neighborhood} ${r.category} 음식`,
       `${r.category} 음식 사진`,
     ]);
 
