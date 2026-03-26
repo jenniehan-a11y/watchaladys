@@ -7,10 +7,11 @@ import { supabase } from "@/src/lib/supabase";
 
 interface RestaurantCardProps {
   restaurant: Restaurant;
+  allRestaurants?: Restaurant[];
   onDelete: (id: string) => void;
 }
 
-export default function RestaurantCard({ restaurant, onDelete }: RestaurantCardProps) {
+export default function RestaurantCard({ restaurant, allRestaurants = [], onDelete }: RestaurantCardProps) {
   const [expanded, setExpanded] = useState(false);
   const router = useRouter();
 
@@ -112,6 +113,47 @@ export default function RestaurantCard({ restaurant, onDelete }: RestaurantCardP
                 삭제
               </button>
             </div>
+
+            {/* Recommendations */}
+            {allRestaurants.length > 1 && (() => {
+              const sameNeighborhood = allRestaurants.filter(
+                (r) => r.neighborhood === restaurant.neighborhood && r.id !== restaurant.id
+              ).slice(0, 3);
+              const sameCategory = allRestaurants.filter(
+                (r) => r.category === restaurant.category && r.id !== restaurant.id && !sameNeighborhood.find(s => s.id === r.id)
+              ).slice(0, 3);
+
+              if (sameNeighborhood.length === 0 && sameCategory.length === 0) return null;
+
+              return (
+                <div className="space-y-2">
+                  {sameNeighborhood.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold opacity-70">📍 {restaurant.neighborhood} 다른 맛집</p>
+                      <div className="flex gap-1 flex-wrap mt-1">
+                        {sameNeighborhood.map((r) => (
+                          <span key={r.id} className="text-xs bg-[#F5F0E8] text-[#3D1A1A] px-2 py-1 rounded-full">
+                            {r.name}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {sameCategory.length > 0 && (
+                    <div>
+                      <p className="text-xs font-semibold opacity-70">🍽 {restaurant.category} 추천</p>
+                      <div className="flex gap-1 flex-wrap mt-1">
+                        {sameCategory.map((r) => (
+                          <span key={r.id} className="text-xs bg-[#D4B8E0] text-[#3D1A1A] px-2 py-1 rounded-full">
+                            {r.name} · {r.neighborhood}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         )}
       </div>

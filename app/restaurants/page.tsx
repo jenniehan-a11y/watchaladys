@@ -91,7 +91,7 @@ export default function RestaurantsPage() {
         ) : (
           <div className="grid grid-cols-3 gap-8">
             {filtered.map((r) => (
-              <RestaurantCard key={r.id} restaurant={r} onDelete={handleDelete} />
+              <RestaurantCard key={r.id} restaurant={r} allRestaurants={restaurants} onDelete={handleDelete} />
             ))}
           </div>
         )}
