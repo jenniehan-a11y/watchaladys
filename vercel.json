@@ -3,6 +3,10 @@
     {
       "path": "/api/sync-sheets",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/discover?neighborhood=%ED%95%A9%EC%A0%95&category=%EC%88%A0%EC%A7%91",
+      "schedule": "0 10 * * 1"
     }
   ]
 }
