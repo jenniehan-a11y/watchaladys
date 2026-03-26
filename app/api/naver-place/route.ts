@@ -57,14 +57,25 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    const placeData = await placeRes.json();
-    const detail = placeData?.data?.placeDetail;
+    const placeText = await placeRes.text();
+    let detail = null;
+    try {
+      const placeData = JSON.parse(placeText);
+      detail = placeData?.data?.placeDetail;
+    } catch {
+      // JSON parse failed
+    }
 
     if (!detail) {
-      return NextResponse.json(
-        { error: "장소 정보를 가져올 수 없습니다" },
-        { status: 404 }
-      );
+      // Fallback: return just the naver map URL with place ID
+      return NextResponse.json({
+        name: "",
+        region: "",
+        neighborhood: "",
+        category: "",
+        naver_map_url: `https://map.naver.com/p/entry/place/${placeId}`,
+        image_url: "",
+      });
     }
 
     const formattedAddress = detail.address?.formattedAddress || "";
@@ -77,7 +88,25 @@ export async function POST(req: NextRequest) {
     const category = categoryRaw.split(",")[0]?.trim() || "";
 
     const images = detail.images?.images || [];
-    const imageUrl = images[0]?.origin || "";
+    let imageUrl = images[0]?.origin || "";
+
+    // If no image from Naver, try Kakao image search
+    if (!imageUrl && detail.name) {
+      try {
+        const kakaoKey = process.env.KAKAO_REST_API_KEY || "";
+        if (kakaoKey) {
+          const q = encodeURIComponent(`${detail.name} ${neighborhood} 음식`);
+          const kakaoRes = await fetch(
+            `https://dapi.kakao.com/v2/search/image?query=${q}&size=1`,
+            { cache: "no-store", headers: { Authorization: `KakaoAK ${kakaoKey}` } }
+          );
+          const kakaoData = await kakaoRes.json();
+          imageUrl = kakaoData.documents?.[0]?.image_url || "";
+        }
+      } catch {
+        // ignore
+      }
+    }
 
     return NextResponse.json({
       name: detail.name || "",
