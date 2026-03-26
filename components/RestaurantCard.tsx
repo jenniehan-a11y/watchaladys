@@ -40,9 +40,20 @@ export default function RestaurantCard({ restaurant, allRestaurants = [], onDele
       {restaurant.image_url && (
         <div
           onClick={handleThumbnailClick}
-          className={`w-full aspect-square bg-cover bg-center ${restaurant.instagram_url ? "cursor-pointer" : ""}`}
+          className={`w-full aspect-square bg-cover bg-center bg-[#3D1A1A]/10 ${restaurant.instagram_url ? "cursor-pointer" : ""}`}
           style={{ backgroundImage: `url(${restaurant.image_url})` }}
-        />
+        >
+          {/* Fallback if image fails to load */}
+          <img
+            src={restaurant.image_url}
+            alt=""
+            className="hidden"
+            onError={(e) => {
+              const parent = (e.target as HTMLElement).parentElement;
+              if (parent) parent.style.display = "none";
+            }}
+          />
+        </div>
       )}
 
       <div className="p-4">
