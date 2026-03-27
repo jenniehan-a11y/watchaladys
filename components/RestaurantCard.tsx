@@ -63,7 +63,7 @@ export default function RestaurantCard({ restaurant, allRestaurants = [], onDele
                 </span>
               )}
               {restaurant.nearest_station && (
-                <span className="text-xs bg-[#6B7FD7] text-[#F5F0E8] px-2 py-0.5 rounded-full">
+                <span className="text-xs bg-[#8B4513] text-[#F5F0E8] px-2 py-0.5 rounded-full">
                   🚇 {restaurant.nearest_station} {restaurant.station_distance_min}분
                 </span>
               )}
