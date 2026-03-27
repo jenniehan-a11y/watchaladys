@@ -8,11 +8,18 @@ import StatusTabs from "@/components/StatusTabs";
 import FilterBar from "@/components/FilterBar";
 import RestaurantCard from "@/components/RestaurantCard";
 
+// neighborhood에서 시/구 추출: "마포구 합정동" → "마포구", "부천시 원미구 중동" → "부천시"
+function getDistrict(neighborhood: string): string {
+  const parts = neighborhood.split(" ");
+  const district = parts.find((p) => /[시구]$/.test(p));
+  return district || parts[0] || "";
+}
+
 export default function RestaurantsPage() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [activeTab, setActiveTab] = useState<"want_to_go" | "visited">("want_to_go");
   const [selectedRegion, setSelectedRegion] = useState("");
-  const [selectedNeighborhood, setSelectedNeighborhood] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [loading, setLoading] = useState(true);
 
@@ -32,17 +39,19 @@ export default function RestaurantsPage() {
     () => [...new Set(restaurants.map((r) => r.region))].sort(),
     [restaurants]
   );
-  const neighborhoods = useMemo(
+
+  const districts = useMemo(
     () =>
       [
         ...new Set(
           restaurants
             .filter((r) => !selectedRegion || r.region === selectedRegion)
-            .map((r) => r.neighborhood)
+            .map((r) => getDistrict(r.neighborhood))
         ),
       ].sort(),
     [restaurants, selectedRegion]
   );
+
   const categoryMap: Record<string, string> = {
     // 한식
     "한식": "한식", "한정식": "한식", "국밥": "한식", "찌개": "한식", "삼겹살": "한식",
@@ -85,7 +94,7 @@ export default function RestaurantsPage() {
   const filtered = restaurants.filter((r) => {
     if (r.status !== activeTab) return false;
     if (selectedRegion && r.region !== selectedRegion) return false;
-    if (selectedNeighborhood && r.neighborhood !== selectedNeighborhood) return false;
+    if (selectedDistrict && getDistrict(r.neighborhood) !== selectedDistrict) return false;
     if (selectedCategory && getMainCategory(r.category) !== selectedCategory) return false;
     return true;
   });
@@ -101,16 +110,16 @@ export default function RestaurantsPage() {
         <StatusTabs activeTab={activeTab} onTabChange={setActiveTab} />
         <FilterBar
           regions={regions}
-          neighborhoods={neighborhoods}
+          districts={districts}
           categories={categories}
           selectedRegion={selectedRegion}
-          selectedNeighborhood={selectedNeighborhood}
+          selectedDistrict={selectedDistrict}
           selectedCategory={selectedCategory}
           onRegionChange={(v) => {
             setSelectedRegion(v);
-            setSelectedNeighborhood("");
+            setSelectedDistrict("");
           }}
-          onNeighborhoodChange={setSelectedNeighborhood}
+          onDistrictChange={setSelectedDistrict}
           onCategoryChange={setSelectedCategory}
         />
       </header>

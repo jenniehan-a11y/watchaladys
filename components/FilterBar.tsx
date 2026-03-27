@@ -2,25 +2,25 @@
 
 interface FilterBarProps {
   regions: string[];
-  neighborhoods: string[];
+  districts: string[];
   categories: string[];
   selectedRegion: string;
-  selectedNeighborhood: string;
+  selectedDistrict: string;
   selectedCategory: string;
   onRegionChange: (value: string) => void;
-  onNeighborhoodChange: (value: string) => void;
+  onDistrictChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
 }
 
 export default function FilterBar({
   regions,
-  neighborhoods,
+  districts,
   categories,
   selectedRegion,
-  selectedNeighborhood,
+  selectedDistrict,
   selectedCategory,
   onRegionChange,
-  onNeighborhoodChange,
+  onDistrictChange,
   onCategoryChange,
 }: FilterBarProps) {
   const selectClass =
@@ -40,13 +40,13 @@ export default function FilterBar({
       </select>
 
       <select
-        value={selectedNeighborhood}
-        onChange={(e) => onNeighborhoodChange(e.target.value)}
+        value={selectedDistrict}
+        onChange={(e) => onDistrictChange(e.target.value)}
         className={selectClass}
       >
-        <option value="">전체 동네</option>
-        {neighborhoods.map((n) => (
-          <option key={n} value={n}>{n}</option>
+        <option value="">전체 시/구</option>
+        {districts.map((d) => (
+          <option key={d} value={d}>{d}</option>
         ))}
       </select>
 

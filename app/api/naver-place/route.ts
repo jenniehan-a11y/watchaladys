@@ -82,19 +82,14 @@ export async function POST(req: NextRequest) {
     const addressParts = formattedAddress.split(" ");
     const region = addressParts[0] || "";
 
-    // 주소에서 동/읍/리/로까지만 추출 (번지 제외)
-    let neighborhood = "";
-    if (region.endsWith("도") && addressParts.length >= 3) {
-      // "경기도 부천시 원미구 중동 123-4" → "부천시 원미구 중동"
-      const parts = addressParts.slice(1);
-      const dongIdx = parts.findIndex((p) => /[동읍리로길]$/.test(p));
-      neighborhood = dongIdx >= 0 ? parts.slice(0, dongIdx + 1).join(" ") : parts.slice(0, 3).join(" ");
-    } else {
-      // "서울특별시 마포구 합정동 123" → "합정동"
-      const parts = addressParts.slice(2);
-      const dongIdx = parts.findIndex((p) => /[동읍리로길]$/.test(p));
-      neighborhood = dongIdx >= 0 ? parts.slice(0, dongIdx + 1).join(" ") : parts[0] || addressParts[1] || "";
-    }
+    // 주소에서 동/읍/리/로까지만 추출 (번지 제외), 구 포함
+    // "경기도 부천시 원미구 중동 123" → "부천시 원미구 중동"
+    // "서울특별시 마포구 합정동 123" → "마포구 합정동"
+    const neighborParts = addressParts.slice(1);
+    const dongIdx = neighborParts.findIndex((p: string) => /[동읍리로길]$/.test(p));
+    const neighborhood = dongIdx >= 0
+      ? neighborParts.slice(0, dongIdx + 1).join(" ")
+      : neighborParts.slice(0, 3).join(" ");
 
     const categoryRaw = detail.category?.category || "";
     const category = categoryRaw.split(",")[0]?.trim() || "";
