@@ -26,8 +26,8 @@ export default function RestaurantCard({ restaurant, allRestaurants = [], onDele
 
   const handleThumbnailClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (restaurant.instagram_url) {
-      window.open(restaurant.instagram_url, "_blank");
+    if (restaurant.naver_map_url) {
+      window.open(restaurant.naver_map_url, "_blank");
     }
   };
 
@@ -42,7 +42,7 @@ export default function RestaurantCard({ restaurant, allRestaurants = [], onDele
           src={restaurant.image_url}
           alt={restaurant.name}
           onClick={handleThumbnailClick}
-          className={`w-full aspect-square object-cover ${restaurant.instagram_url ? "cursor-pointer" : ""}`}
+          className={`w-full aspect-square object-cover ${restaurant.naver_map_url ? "cursor-pointer" : ""}`}
           onError={(e) => {
             (e.target as HTMLElement).style.display = "none";
           }}
@@ -52,7 +52,13 @@ export default function RestaurantCard({ restaurant, allRestaurants = [], onDele
       <div className="p-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-bold text-lg">{restaurant.name}</h3>
+            <h3
+              className="font-bold text-lg hover:underline"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (restaurant.naver_map_url) window.open(restaurant.naver_map_url, "_blank");
+              }}
+            >{restaurant.name}</h3>
             <p className="text-sm opacity-80">
               {restaurant.neighborhood} · {restaurant.category}
             </p>
