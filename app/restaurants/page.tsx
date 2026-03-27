@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import Link from "next/link";
 import { supabase } from "@/src/lib/supabase";
 import type { Restaurant } from "@/src/lib/types";
@@ -15,6 +15,23 @@ function getDistrict(neighborhood: string): string {
   return district || parts[0] || "";
 }
 
+// 2차 카테고리 (술집/바 계열)
+const secondRoundCategories = new Set([
+  "술집", "호프,요리주점", "칵테일바", "와인바", "이자카야",
+  "포장마차", "맥주,호프", "일본식주점",
+]);
+
+function isSecondRound(category: string): boolean {
+  if (secondRoundCategories.has(category)) return true;
+  for (const key of secondRoundCategories) {
+    if (category.includes(key)) return true;
+  }
+  if (category.includes("술") || category.includes("바") || category.includes("펍") ||
+      category.includes("호프") || category.includes("포차") || category.includes("주점") ||
+      category.includes("이자카야")) return true;
+  return false;
+}
+
 export default function RestaurantsPage() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [activeTab, setActiveTab] = useState<"want_to_go" | "visited">("want_to_go");
@@ -22,8 +39,10 @@ export default function RestaurantsPage() {
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [selectedDong, setSelectedDong] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedRound, setSelectedRound] = useState("");
   const [sortBy, setSortBy] = useState("latest");
   const [loading, setLoading] = useState(true);
+  const [randomPick, setRandomPick] = useState<Restaurant | null>(null);
 
   useEffect(() => {
     async function fetchRestaurants() {
@@ -109,6 +128,8 @@ export default function RestaurantsPage() {
       if (selectedDistrict && getDistrict(r.neighborhood) !== selectedDistrict) return false;
       if (selectedDong && r.dong !== selectedDong) return false;
       if (selectedCategory && getMainCategory(r.category) !== selectedCategory) return false;
+      if (selectedRound === "1차" && isSecondRound(r.category)) return false;
+      if (selectedRound === "2차" && !isSecondRound(r.category)) return false;
       return true;
     });
 
@@ -116,10 +137,18 @@ export default function RestaurantsPage() {
       result = [...result].sort((a, b) => (b.naver_rating ?? 0) - (a.naver_rating ?? 0));
     } else if (sortBy === "station") {
       result = [...result].sort((a, b) => (a.station_distance_min ?? 999) - (b.station_distance_min ?? 999));
+    } else if (sortBy === "popular") {
+      result = [...result].sort((a, b) => (b.naver_review_count ?? 0) - (a.naver_review_count ?? 0));
     }
 
     return result;
-  }, [restaurants, activeTab, selectedRegion, selectedDistrict, selectedDong, selectedCategory, sortBy]);
+  }, [restaurants, activeTab, selectedRegion, selectedDistrict, selectedDong, selectedCategory, selectedRound, sortBy]);
+
+  const handleRandomPick = useCallback(() => {
+    if (filtered.length === 0) return;
+    const pick = filtered[Math.floor(Math.random() * filtered.length)];
+    setRandomPick(pick);
+  }, [filtered]);
 
   const handleDelete = (id: string) => {
     setRestaurants((prev) => prev.filter((r) => r.id !== id));
@@ -139,6 +168,7 @@ export default function RestaurantsPage() {
           selectedDistrict={selectedDistrict}
           selectedDong={selectedDong}
           selectedCategory={selectedCategory}
+          selectedRound={selectedRound}
           sortBy={sortBy}
           onRegionChange={(v) => {
             setSelectedRegion(v);
@@ -151,11 +181,53 @@ export default function RestaurantsPage() {
           }}
           onDongChange={setSelectedDong}
           onCategoryChange={setSelectedCategory}
+          onRoundChange={setSelectedRound}
           onSortChange={setSortBy}
         />
       </header>
 
       <section className="px-4 md:px-16 py-6 md:py-8">
+        {/* 랜덤 추천 버튼 */}
+        <button
+          onClick={handleRandomPick}
+          className="w-full mb-6 py-3 rounded-2xl bg-[#2D5016] text-[#F5F0E8] font-bold text-base hover:bg-[#3D6A20] transition-colors"
+        >
+          🎲 오늘 뭐 먹지?
+        </button>
+
+        {/* 랜덤 추천 결과 */}
+        {randomPick && (
+          <div className="mb-6 p-4 rounded-2xl bg-[#3D1A1A] text-[#F5F0E8] relative">
+            <button
+              onClick={() => setRandomPick(null)}
+              className="absolute top-3 right-3 text-[#F5F0E8]/60 hover:text-[#F5F0E8] text-sm"
+            >
+              ✕
+            </button>
+            <p className="text-sm opacity-70 mb-1">오늘의 추천</p>
+            <h3
+              className="text-xl font-bold cursor-pointer hover:underline"
+              onClick={() => randomPick.naver_map_url && window.open(randomPick.naver_map_url, "_blank")}
+            >
+              {randomPick.name}
+            </h3>
+            <p className="text-sm opacity-80 mt-1">
+              {randomPick.neighborhood} · {randomPick.category}
+            </p>
+            {randomPick.nearest_station && (
+              <p className="text-sm opacity-60 mt-1">
+                🚇 {randomPick.nearest_station} {randomPick.station_distance_min}분
+              </p>
+            )}
+            <button
+              onClick={handleRandomPick}
+              className="mt-3 px-4 py-2 rounded-xl bg-[#E8652E] text-[#F5F0E8] text-sm font-semibold hover:bg-[#D55A25] transition-colors"
+            >
+              다시 뽑기
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <p className="text-center text-[#3D1A1A]/60 py-12">불러오는 중...</p>
         ) : filtered.length === 0 ? (
