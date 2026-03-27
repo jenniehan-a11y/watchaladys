@@ -94,25 +94,21 @@ export async function POST(req: NextRequest) {
     const categoryRaw = detail.category?.category || "";
     const category = categoryRaw.split(",")[0]?.trim() || "";
 
-    const images = detail.images?.images || [];
-    let imageUrl = images[0]?.origin || "";
-
-    // If no image from Naver, try Kakao image search
-    if (!imageUrl && detail.name) {
-      try {
-        const kakaoKey = process.env.KAKAO_REST_API_KEY || "";
-        if (kakaoKey) {
-          const q = encodeURIComponent(`${detail.name} ${neighborhood} 음식`);
-          const kakaoRes = await fetch(
-            `https://dapi.kakao.com/v2/search/image?query=${q}&size=1`,
-            { cache: "no-store", headers: { Authorization: `KakaoAK ${kakaoKey}` } }
-          );
-          const kakaoData = await kakaoRes.json();
-          imageUrl = kakaoData.documents?.[0]?.image_url || "";
-        }
-      } catch {
-        // ignore
+    // 항상 카카오CDN 썸네일 사용 (네이버/외부 이미지는 브라우저에서 차단됨)
+    let imageUrl = "";
+    try {
+      const kakaoKey = process.env.KAKAO_REST_API_KEY || "";
+      if (kakaoKey && detail.name) {
+        const q = encodeURIComponent(`${detail.name} ${neighborhood} 맛집`);
+        const kakaoRes = await fetch(
+          `https://dapi.kakao.com/v2/search/image?query=${q}&size=1`,
+          { cache: "no-store", headers: { Authorization: `KakaoAK ${kakaoKey}` } }
+        );
+        const kakaoData = await kakaoRes.json();
+        imageUrl = kakaoData.documents?.[0]?.thumbnail_url || "";
       }
+    } catch {
+      // ignore
     }
 
     return NextResponse.json({
