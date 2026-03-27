@@ -23,6 +23,15 @@ export default function RestaurantForm({ initialData }: RestaurantFormProps) {
     instagram_url: initialData?.instagram_url ?? "",
     memo: initialData?.memo ?? "",
     image_url: initialData?.image_url ?? "",
+    latitude: initialData?.latitude ?? null,
+    longitude: initialData?.longitude ?? null,
+    naver_rating: initialData?.naver_rating ?? null,
+    kakao_rating: initialData?.kakao_rating ?? null,
+    naver_review_count: initialData?.naver_review_count ?? null,
+    kakao_review_count: initialData?.kakao_review_count ?? null,
+    nearest_station: initialData?.nearest_station ?? null,
+    station_distance_min: initialData?.station_distance_min ?? null,
+    dong: initialData?.dong ?? null,
   });
   const [saving, setSaving] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");

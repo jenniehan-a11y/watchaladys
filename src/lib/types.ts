@@ -9,6 +9,15 @@ export interface Restaurant {
   instagram_url: string | null;
   memo: string | null;
   image_url: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  naver_rating: number | null;
+  kakao_rating: number | null;
+  naver_review_count: number | null;
+  kakao_review_count: number | null;
+  nearest_station: string | null;
+  station_distance_min: number | null;
+  dong: string | null;
   created_at: string;
   updated_at: string;
 }

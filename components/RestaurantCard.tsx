@@ -56,6 +56,18 @@ export default function RestaurantCard({ restaurant, allRestaurants = [], onDele
             <p className="text-sm opacity-80">
               {restaurant.neighborhood} · {restaurant.category}
             </p>
+            <div className="flex flex-wrap gap-1 mt-1">
+              {restaurant.naver_rating && (
+                <span className="text-xs bg-[#2D5016] text-[#F5F0E8] px-2 py-0.5 rounded-full">
+                  N {restaurant.naver_rating}
+                </span>
+              )}
+              {restaurant.nearest_station && (
+                <span className="text-xs bg-[#6B7FD7] text-[#F5F0E8] px-2 py-0.5 rounded-full">
+                  {restaurant.nearest_station} {restaurant.station_distance_min}분
+                </span>
+              )}
+            </div>
           </div>
           <span className="text-xs bg-[#F5F0E8] text-[#3D1A1A] px-2 py-1 rounded-full">
             {restaurant.region}
