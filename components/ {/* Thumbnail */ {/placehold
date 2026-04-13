@@ -16,8 +16,7 @@
     const [expanded, setExpanded] = useState(false);
     const router = useRouter();
 
-    const placeholderUrl = `https://placehold.co/400x400/E8652
-  E/fff?text=${encodeURIComponent(restaurant.name.slice(0,
+   const placeholderUrl = `https://placehold.co/400x400/E8652E/fff?text=${encodeURIComponent(restaurant.name.slice(0,
   4))}`;
 
     const handleDelete = async () => {
