@@ -38,16 +38,21 @@ export default function RestaurantCard({ restaurant, allRestaurants = [], onDele
     >
       {/* Thumbnail */}
       {restaurant.image_url && (
-        <img
-          src={restaurant.image_url}
-          alt={restaurant.name}
-          onClick={handleThumbnailClick}
-          className={`w-full aspect-square object-cover ${restaurant.naver_map_url ? "cursor-pointer" : ""}`}
-          onError={(e) => {
-            (e.target as HTMLElement).style.display = "none";
-          }}
-        />
-      )}
+         <img
+            src={restaurant.image_url}
+            alt={restaurant.name}
+            referrerPolicy="no-referrer"
+            crossOrigin="anonymous"
+            onClick={handleThumbnailClick}
+            className={`w-full aspect-square object-cover
+  ${restaurant.naver_map_url ? "cursor-pointer" : ""}`}
+            onError={(e) => {
+              const img = e.target as HTMLImageElement;
+              img.onerror = null;
+              img.src = `https://placehold.co/400x400/E8652E/f
+  ff?text=${encodeURIComponent(restaurant.name.slice(0, 4))}`;
+            }}
+          />
 
       <div className="p-4">
         <div className="flex items-center justify-between">
